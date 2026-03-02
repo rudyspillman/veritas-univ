@@ -4,14 +4,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+
 if (!apiKey) {
   console.error("CRITICAL: GEMINI_API_KEY (or VITE_GEMINI_API_KEY) is missing from environment variables.");
 }
 
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
-const VERITAS_SYSTEM_INSTRUCTION = `
-You are VERITAS AI, a Universal Verification Engine.
+const VERITAS_SYSTEM_INSTRUCTION = `You are VERITAS AI, a Universal Verification Engine.
 Your mission is to verify the authenticity and truthfulness of input provided by the user (Text, Documents, Images, Video, Audio).
 Your role is forensic, analytical, and neutral.
 
@@ -30,8 +30,7 @@ Respond ONLY with a JSON object.
 - reasoning: A brief summary paragraph of the forensic analysis.
 - disclaimer: A mandatory string: "Analytical assessment based on algorithmic pattern recognition. Not an official certification or legal determination."
 
-TONE: Neutral, factual, professional, non-alarmist.
-`;
+TONE: Neutral, factual, professional, non-alarmist.`;
 
 const responseSchema: Schema = {
   type: Type.OBJECT,
@@ -64,7 +63,6 @@ export const analyzeContentBackend = async (
         }
       });
     }
-
     if (text) {
       parts.push({ text: text });
     }
@@ -74,7 +72,7 @@ export const analyzeContentBackend = async (
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-1.5-pro', // <--- ÚNICO CAMBIO: modelo válido
       contents: {
         role: 'user',
         parts: parts
@@ -89,7 +87,6 @@ export const analyzeContentBackend = async (
 
     const jsonText = response.text || "{}";
     return JSON.parse(jsonText);
-
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     throw new Error("Verification protocol failed. System unresponsive.");
